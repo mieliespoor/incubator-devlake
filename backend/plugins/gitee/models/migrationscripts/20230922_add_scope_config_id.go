@@ -31,7 +31,7 @@ type giteeRepo20230922 struct {
 }
 
 func (giteeRepo20230922) TableName() string {
-	return "_raw_gitee_api_repo"
+	return "_tool_gitee_repos"
 }
 
 type addScopeConfigIdToRepo struct{}

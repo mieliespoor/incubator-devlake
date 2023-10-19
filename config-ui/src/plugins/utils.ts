@@ -19,7 +19,7 @@
 import PluginIcon from '@/images/plugin-icon.svg';
 
 import { PluginConfig } from './config';
-import { PluginConfigType, PluginType } from './types';
+import { PluginConfigType } from './types';
 
 export const getPluginScopeId = (plugin: string, scope: any) => {
   switch (plugin) {
@@ -30,7 +30,7 @@ export const getPluginScopeId = (plugin: string, scope: any) => {
     case 'gitlab':
       return `${scope.gitlabId}`;
     case 'jenkins':
-      return `${scope.jobFullName}`;
+      return `${scope.fullName}`;
     case 'bitbucket':
       return `${scope.bitbucketId}`;
     case 'sonarqube':
@@ -46,7 +46,6 @@ export const getPluginConfig = (name: string): PluginConfigType => {
   let pluginConfig = PluginConfig.find((plugin) => plugin.plugin === name) as PluginConfigType;
   if (!pluginConfig) {
     pluginConfig = {
-      type: PluginType.Pipeline,
       plugin: name,
       name: name,
       icon: PluginIcon,

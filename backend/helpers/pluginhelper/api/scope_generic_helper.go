@@ -18,7 +18,6 @@ limitations under the License.
 package api
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -36,7 +35,6 @@ import (
 	"github.com/apache/incubator-devlake/helpers/dbhelper"
 	serviceHelper "github.com/apache/incubator-devlake/helpers/pluginhelper/services"
 	"github.com/go-playground/validator/v10"
-	"github.com/mitchellh/mapstructure"
 )
 
 type NoScopeConfig struct{}
@@ -64,8 +62,9 @@ type (
 	// Alias, for swagger purposes
 	ScopeRefDoc                                            = serviceHelper.BlueprintProjectPairs
 	ScopeRes[Scope plugin.ToolLayerScope, ScopeConfig any] struct {
-		Scope                    Scope                    `mapstructure:",squash"` // ideally we need this field to be embedded in the struct
-		ScopeResDoc[ScopeConfig] `mapstructure:",squash"` // however, only this type of embeding is supported as of golang 1.20
+		Scope       Scope               `mapstructure:"scope,omitempty" json:"scope,omitempty"`
+		ScopeConfig *ScopeConfig        `mapstructure:"scopeConfig,omitempty" json:"scopeConfig,omitempty"`
+		Blueprints  []*models.Blueprint `mapstructure:"blueprints,omitempty" json:"blueprints,omitempty"`
 	}
 	ScopeListRes[Scope plugin.ToolLayerScope, ScopeConfig any] struct {
 		Scopes []*ScopeRes[Scope, ScopeConfig] `mapstructure:"scopes" json:"scopes"`
@@ -174,7 +173,7 @@ func (gs *GenericScopeApiHelper[Conn, Scope, ScopeConfig]) PutScopes(input *plug
 	}
 	now := time.Now()
 	for _, scope := range scopes {
-		// Set the connection ID, CreatedDate, and UpdatedDate fields
+		// Set the connection ID, CreatedAt, and UpdatedAt fields
 		gs.setScopeFields(scope, params.connectionId, &now, &now)
 		err = gs.verifyScope(scope, gs.validator)
 		if err != nil {
@@ -426,7 +425,7 @@ func (gs *GenericScopeApiHelper[Conn, Scope, ScopeConfig]) createRawParams(conne
 	return plugin.MarshalScopeParams(paramsMap)
 }
 
-func (gs *GenericScopeApiHelper[Conn, Scope, ScopeConfig]) setScopeFields(p interface{}, connectionId uint64, createdDate *time.Time, updatedDate *time.Time) {
+func (gs *GenericScopeApiHelper[Conn, Scope, ScopeConfig]) setScopeFields(p interface{}, connectionId uint64, createdAt *time.Time, updatedAt *time.Time) {
 	pType := reflect.TypeOf(p)
 	if pType.Kind() != reflect.Ptr {
 		panic("expected a pointer to a struct")
@@ -444,24 +443,24 @@ func (gs *GenericScopeApiHelper[Conn, Scope, ScopeConfig]) setScopeFields(p inte
 	scopeIdField := pValue.FieldByName(gs.reflectionParams.ScopeIdFieldName)
 	rawParams.Set(reflect.ValueOf(gs.createRawParams(connectionId, scopeIdField.Interface())))
 
-	// set CreatedDate
-	createdDateField := pValue.FieldByName("CreatedDate")
-	if createdDateField.IsValid() && createdDateField.Type().AssignableTo(reflect.TypeOf(createdDate)) {
-		createdDateField.Set(reflect.ValueOf(createdDate))
+	// set CreatedAt
+	createdAtField := pValue.FieldByName("CreatedAt")
+	if createdAtField.IsValid() && createdAtField.Type().AssignableTo(reflect.TypeOf(createdAt)) {
+		createdAtField.Set(reflect.ValueOf(createdAt))
 	}
 
-	// set UpdatedDate
-	updatedDateField := pValue.FieldByName("UpdatedDate")
-	if !updatedDateField.IsValid() || (updatedDate != nil && !updatedDateField.Type().AssignableTo(reflect.TypeOf(updatedDate))) {
+	// set UpdatedAt
+	updatedAtField := pValue.FieldByName("UpdatedAt")
+	if !updatedAtField.IsValid() || (updatedAt != nil && !updatedAtField.Type().AssignableTo(reflect.TypeOf(updatedAt))) {
 		return
 	}
-	if updatedDate == nil {
-		// if updatedDate is nil, set UpdatedDate to be nil
-		updatedDateField.Set(reflect.Zero(updatedDateField.Type()))
+	if updatedAt == nil {
+		// if updatedAt is nil, set UpdatedAt to be nil
+		updatedAtField.Set(reflect.Zero(updatedAtField.Type()))
 	} else {
-		// if updatedDate is not nil, set UpdatedDate to be the value
-		updatedDateFieldValue := reflect.ValueOf(updatedDate)
-		updatedDateField.Set(updatedDateFieldValue)
+		// if updatedAt is not nil, set UpdatedAt to be the value
+		updatedAtFieldValue := reflect.ValueOf(updatedAt)
+		updatedAtField.Set(updatedAtFieldValue)
 	}
 }
 
@@ -599,22 +598,6 @@ func (gs *GenericScopeApiHelper[Conn, Scope, ScopeConfig]) transactionalDelete(t
 		return errors.Default.New(fmt.Sprintf("Failed to delete all expected rows from the following table(s): %v", failedTables))
 	}
 	return nil
-}
-
-// Implement MarshalJSON method to flatten all fields
-func (sr *ScopeRes[T, Y]) MarshalJSON() ([]byte, error) {
-	var flatMap map[string]interface{}
-	err := mapstructure.Decode(sr, &flatMap)
-	if err != nil {
-		return nil, err
-	}
-	// Encode the flattened map to JSON
-	result, err := json.Marshal(flatMap)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
 }
 
 func (gs *GenericScopeApiHelper[Conn, Scope, ScopeConfig]) getAffectedTables(pluginName string) ([]string, errors.Error) {

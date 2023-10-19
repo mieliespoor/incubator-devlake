@@ -36,7 +36,6 @@ import (
 	dora "github.com/apache/incubator-devlake/plugins/dora/impl"
 	org "github.com/apache/incubator-devlake/plugins/org/impl"
 	refdiff "github.com/apache/incubator-devlake/plugins/refdiff/impl"
-	remotePlugin "github.com/apache/incubator-devlake/server/services/remote/plugin"
 
 	"github.com/apache/incubator-devlake/core/config"
 	corectx "github.com/apache/incubator-devlake/core/context"
@@ -173,7 +172,7 @@ func ConnectLocalServer(t *testing.T, clientConfig *LocalClientConfig) *DevlakeC
 		cfg.Set("PLUGIN_DIR", throwawayDir)
 		cfg.Set("LOGGING_DIR", throwawayDir)
 		go func() {
-			initService.Do(api.CreateApiService)
+			initService.Do(func() { api.CreateApiService(nil) })
 		}()
 		req, err2 := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/proceed-db-migration", addr), nil)
 		require.NoError(t, err2)
@@ -289,13 +288,6 @@ func (d *DevlakeClient) initPlugins(cfg *LocalClientConfig) {
 	for _, p := range cfg.Plugins {
 		require.NoError(d.testCtx, plugin.RegisterPlugin(p.Name(), p))
 	}
-	for _, p := range plugin.AllPlugins() {
-		if pi, ok := p.(plugin.PluginInit); ok {
-			err := pi.Init(d.basicRes)
-			require.NoError(d.testCtx, err)
-		}
-	}
-	remotePlugin.Init(d.basicRes)
 }
 
 func (d *DevlakeClient) prepareDB(cfg *LocalClientConfig) {
