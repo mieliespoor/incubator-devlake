@@ -41,5 +41,6 @@ func All() []plugin.MigrationScript {
 		new(addRawParamTableForScope),
 		new(addProjectArchived),
 		new(addDeployment),
+		new(addEnvNamePattern),
 	}
 }

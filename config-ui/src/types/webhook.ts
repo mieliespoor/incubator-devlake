@@ -16,28 +16,24 @@
  *
  */
 
-export type PluginConfigType = {
-  plugin: string;
+export interface IWebhookAPI {
+  id: number;
   name: string;
-  icon: string;
-  sort: number;
-  isBeta?: boolean;
-  connection: {
-    docLink: string;
-    initialValues?: Record<string, any>;
-    fields: any[];
+  postIssuesEndpoint: string;
+  closeIssuesEndpoint: string;
+  postPipelineDeployTaskEndpoint: string;
+  apiKey: {
+    id: number;
+    apiKey: string;
   };
-  dataScope: {
-    localSearch?: boolean;
-    title?: string;
-    millerColumn?: {
-      columnCount?: number;
-      firstColumnTitle?: string;
-    };
-    render?: (props: any) => React.ReactNode;
-  };
-  scopeConfig?: {
-    entities: string[];
-    transformation: any;
-  };
-};
+}
+
+export interface IWebhook {
+  id: number;
+  name: string;
+  postIssuesEndpoint: string;
+  closeIssuesEndpoint: string;
+  postPipelineDeployTaskEndpoint: string;
+  apiKey: string;
+  apiKeyId: number;
+}

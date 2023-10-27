@@ -17,23 +17,11 @@
  */
 
 import { useState, useMemo } from 'react';
-import { Button, Intent, InputGroup } from '@blueprintjs/core';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { Button, Tag, Intent, InputGroup } from '@blueprintjs/core';
+import dayjs from 'dayjs';
 
 import API from '@/api';
-import {
-  PageHeader,
-  Table,
-  Dialog,
-  FormItem,
-  Selector,
-  ExternalLink,
-  TextTooltip,
-  IconButton,
-  toast,
-  Buttons,
-  Message,
-} from '@/components';
+import { PageHeader, Table, Dialog, FormItem, Selector, ExternalLink, CopyText, Message } from '@/components';
 import { useRefreshData } from '@/hooks';
 import { operator, formatTime } from '@/utils';
 
@@ -47,7 +35,7 @@ export const ApiKeys = () => {
   const [operating, setOperating] = useState(false);
   const [modal, setModal] = useState<'create' | 'show' | 'delete'>();
   const [currentId, setCurrentId] = useState<string>();
-  const [currentKey, setCurrentKey] = useState<string>();
+  const [currentKey, setCurrentKey] = useState<string>('');
   const [form, setForm] = useState<{
     name: string;
     expiredAt?: string;
@@ -61,6 +49,7 @@ export const ApiKeys = () => {
   const { data, ready } = useRefreshData(() => API.apiKey.list({ page, pageSize }), [version, page, pageSize]);
 
   const [dataSource, total] = useMemo(() => [data?.apikeys ?? [], data?.count ?? 0], [data]);
+  const hasError = useMemo(() => !form.name || !form.allowedPath, [form]);
 
   const timeSelectedItem = useMemo(() => {
     return C.timeOptions.find((it) => it.value === form.expiredAt || !it.value);
@@ -73,7 +62,6 @@ export const ApiKeys = () => {
   const handleSubmit = async () => {
     const [success, res] = await operator(() => API.apiKey.create(form), {
       setOperating,
-      hideToast: true,
     });
 
     if (success) {
@@ -120,7 +108,12 @@ export const ApiKeys = () => {
             dataIndex: 'expiredAt',
             key: 'expiredAt',
             width: 200,
-            render: (val) => (val ? formatTime(val, 'YYYY-MM-DD') : 'No expiration'),
+            render: (val) => (
+              <div>
+                <span>{val ? formatTime(val, 'YYYY-MM-DD') : 'No expiration'}</span>
+                {dayjs().isAfter(dayjs(val)) && <Tag style={{ marginLeft: 8 }}>Expired</Tag>}
+              </div>
+            ),
           },
           {
             title: 'Allowed Path',
@@ -164,6 +157,7 @@ export const ApiKeys = () => {
           title="Generate a New API Key"
           okLoading={operating}
           okText="Generate"
+          okDisabled={hasError}
           onCancel={handleCancel}
           onOk={handleSubmit}
         >
@@ -191,14 +185,14 @@ export const ApiKeys = () => {
             subLabel={
               <p>
                 Enter a Regular Expression that matches the API URL(s) from the{' '}
-                <ExternalLink link="">DevLake API docs</ExternalLink>. The default Regular Expression is set to all
-                APIs.
+                <ExternalLink link="/api/swagger/index.html">DevLake API docs</ExternalLink>. The default Regular
+                Expression is set to all APIs.
               </p>
             }
             required
           >
             <S.InputContainer>
-              <span>http://localhost:4000/api/rest</span>
+              <span>http://localhost:4000/api/rest/</span>
               <InputGroup
                 placeholder=""
                 value={form.allowedPath}
@@ -216,18 +210,10 @@ export const ApiKeys = () => {
           footer={null}
           onCancel={handleCancel}
         >
-          <div>Please make sure to copy your API key now. You will not be able to see it again.</div>
-          <S.KeyContainer>
-            <TextTooltip style={{ width: '96%' }} content="">
-              {currentKey}
-            </TextTooltip>
-            <CopyToClipboard text={currentKey as string} onCopy={() => toast.success('Copy successfully.')}>
-              <IconButton icon="clipboard" tooltip="Copy" />
-            </CopyToClipboard>
-          </S.KeyContainer>
-          <Buttons position="bottom" align="right">
-            <Button intent={Intent.PRIMARY} text="Confirm" onClick={handleCancel} />
-          </Buttons>
+          <div style={{ marginBottom: 16 }}>
+            Please make sure to copy your API key now. You will not be able to see it again.
+          </div>
+          <CopyText content={currentKey} />
         </Dialog>
       )}
       {modal === 'delete' && (

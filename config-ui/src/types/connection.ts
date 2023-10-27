@@ -16,6 +16,21 @@
  *
  */
 
+export interface IConnectionAPI {
+  id: ID;
+  name: string;
+  endpoint: string;
+  authMethod?: string;
+  token?: string;
+  username?: string;
+  password?: string;
+  proxy: string;
+  apiKey?: string;
+  dbUrl?: string;
+  appId?: string;
+  secretKey?: string;
+}
+
 export enum IConnectionStatus {
   IDLE = 'idle',
   TESTING = 'testing',

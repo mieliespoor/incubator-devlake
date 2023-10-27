@@ -21,9 +21,9 @@ import { useLoaderData, Outlet, useNavigate, useLocation } from 'react-router-do
 import { CSSTransition } from 'react-transition-group';
 import { Menu, MenuItem, Navbar, Alignment } from '@blueprintjs/core';
 
-import { useAppDispatch } from '@/app/hook';
-import { Logo, ExternalLink, IconButton } from '@/components';
-import { init } from '@/features';
+import { useAppDispatch, useAppSelector } from '@/app/hook';
+import { PageLoading, Logo, ExternalLink, IconButton } from '@/components';
+import { init, selectStatus } from '@/features';
 import { DOC_URL } from '@/release';
 import { TipsContextProvider, TipsContextConsumer } from '@/store';
 
@@ -39,20 +39,25 @@ import * as S from './styled';
 import './tips-transition.css';
 
 export const Layout = () => {
-  const { version } = useLoaderData() as Awaited<ReturnType<typeof loader>>;
-
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    dispatch(init());
-  }, []);
+  const { version, plugins } = useLoaderData() as Awaited<ReturnType<typeof loader>>;
 
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
+  const dispatch = useAppDispatch();
+  const status = useAppSelector(selectStatus);
+
   const menu = useMenu();
 
   const tipsRef = useRef(null);
+
+  useEffect(() => {
+    dispatch(init(plugins));
+  }, []);
+
+  if (['idle', 'loading'].includes(status)) {
+    return <PageLoading />;
+  }
 
   const handlePushPath = (it: MenuItemType) => {
     if (!it.target) {

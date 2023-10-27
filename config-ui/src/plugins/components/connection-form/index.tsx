@@ -23,8 +23,9 @@ import { pick } from 'lodash';
 import API from '@/api';
 import { useAppDispatch, useAppSelector } from '@/app/hook';
 import { ExternalLink, Buttons } from '@/components';
+import { addConnection, updateConnection } from '@/features';
 import { selectConnection } from '@/features/connections';
-import { PluginConfig, PluginConfigType } from '@/plugins';
+import { getPluginConfig } from '@/plugins';
 import { operator } from '@/utils';
 
 import { Form } from './fields';
@@ -47,7 +48,7 @@ export const ConnectionForm = ({ plugin, connectionId, onSuccess }: Props) => {
   const {
     name,
     connection: { docLink, fields, initialValues },
-  } = useMemo(() => PluginConfig.find((p) => p.plugin === plugin) as PluginConfigType, [plugin]);
+  } = getPluginConfig(plugin);
 
   const disabled = useMemo(() => {
     return Object.values(errors).some((value) => value);
@@ -82,7 +83,9 @@ export const ConnectionForm = ({ plugin, connectionId, onSuccess }: Props) => {
   const handleSave = async () => {
     const [success, res] = await operator(
       () =>
-        !connectionId ? API.connection.create(plugin, values) : API.connection.update(plugin, connectionId, values),
+        !connectionId
+          ? dispatch(addConnection({ plugin, ...values })).unwrap()
+          : dispatch(updateConnection({ plugin, connectionId, ...values })).unwrap(),
       {
         setOperating,
         formatMessage: () => (!connectionId ? 'Create a New Connection Successful.' : 'Update Connection Successful.'),
