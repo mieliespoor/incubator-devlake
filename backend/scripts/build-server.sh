@@ -18,24 +18,11 @@
 set -e
 
 ROOT_DIR=$(dirname $(dirname "$0"))
+VERSION=${VERSION:-$(git describe --tags --always --dirty || true)}
+EXTRA=""
 
-# generate all docs by default, set the working dir (-d .) to root and general api info file (-g ./server/api/api.go).
-DOC_DIRS=$ROOT_DIR
-GENERAL_API_INFO_PATH=$ROOT_DIR/server/api/api.go
-
-
-if [ -n "$DEVLAKE_PLUGINS" ]; then
-  # change doc dir to avoid generating all docs (-d ./server/api)
-  DOC_DIRS=$ROOT_DIR/server/api
-  GENERAL_API_INFO_PATH=api.go
-  if ! [ "$DEVLAKE_PLUGINS" = "none" ]; then
-    # append plugin dirs to the doc dirs
-    for plugin in $(echo $DEVLAKE_PLUGINS | tr "," "\n"); do
-      DOC_DIRS="$DOC_DIRS,$ROOT_DIR/plugins/$plugin"
-    done
-  fi
+if [ -n "$DEVLAKE_DEBUG" ]; then
+    EXTRA="-gcflags='all=-N -l'"
 fi
 
-go mod download
-swag init --parseDependency --parseInternal -o $ROOT_DIR/server/api/docs -g $GENERAL_API_INFO_PATH -d $DOC_DIRS
-echo "visit the swagger document on http://localhost:8080/swagger/index.html";
+go build $EXTRA -ldflags "-X 'github.com/apache/incubator-devlake/core/version.Version=$VERSION'" -o $ROOT_DIR/bin/lake $ROOT_DIR/server/
