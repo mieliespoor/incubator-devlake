@@ -20,13 +20,15 @@ package models
 import (
 	"github.com/apache/incubator-devlake/core/plugin"
 	"github.com/apache/incubator-devlake/core/utils"
-	"github.com/apache/incubator-devlake/helpers/pluginhelper/api"
+	helper "github.com/apache/incubator-devlake/helpers/pluginhelper/api"
 )
+
+type OctopusAccessToken helper.AccessToken
 
 // OctopusConn holds the essential information to connect to the Octopus API
 type OctopusConn struct {
-	api.RestConnection `mapstructure:",squash"`
-	api.AccessToken    `mapstructure:",squash"`
+	helper.RestConnection `mapstructure:",squash"`
+	OctopusAccessToken    `mapstructure:",squash"`
 }
 
 var _ plugin.ApiConnection = (*OctopusConnection)(nil)
@@ -37,8 +39,8 @@ func (conn *OctopusConn) Sanitize() OctopusConn {
 }
 
 type OctopusConnection struct {
-	api.BaseConnection `mapstructure:",squash"`
-	OctopusConn        `mapstructure:",squash"`
+	helper.BaseConnection `mapstructure:",squash"`
+	OctopusConn           `mapstructure:",squash"`
 }
 
 func (connection OctopusConnection) Sanitize() OctopusConnection {

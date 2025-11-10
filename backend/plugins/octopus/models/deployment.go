@@ -17,20 +17,28 @@ limitations under the License.
 
 package models
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type OctopusDeployment struct {
-	ID            uint64 `gorm:"primaryKey;autoIncrement" json:"id"`
-	ConnectionId  uint64 `gorm:"primaryKey;type:BIGINT  NOT NULL" json:"connectionId"`
-	DeploymentId  string `gorm:"primaryKey;type:VARCHAR(255) NOT NULL" json:"deploymentId"`
-	ProjectId     string `gorm:"type:VARCHAR(255)" json:"projectId"`
-	EnvironmentId string `gorm:"type:VARCHAR(255)" json:"environmentId"`
-	ReleaseId     string `gorm:"type:VARCHAR(255)" json:"releaseId"`
-	DeployedAt    string `gorm:"type:VARCHAR(255)" json:"deployedAt"`
-	DeployedBy    string `gorm:"type:VARCHAR(255)" json:"deployedBy"`
-	TenantId      string `gorm:"type:VARCHAR(255)" json:"tenantId"`
-	TenantName    string `gorm:"type:VARCHAR(255)" json:"tenantName"`
-	// add more fields if necessary
+	Id                 string     `gorm:"primaryKey;type:VARCHAR(255) NOT NULL" json:"id"`
+	ConnectionId       uint64     `gorm:"primaryKey;type:BIGINT  NOT NULL" json:"connectionId"`
+	ProjectId          string     `gorm:"type:VARCHAR(255)" json:"projectId"`
+	EnvironmentId      string     `gorm:"type:VARCHAR(255)" json:"environmentId"`
+	ReleaseId          string     `gorm:"type:VARCHAR(255)" json:"releaseId"`
+	Created            time.Time  `gorm:"type:TIMESTAMP;DEFAULT:CURRENT_TIMESTAMP" json:"created"`
+	DeployedBy         string     `gorm:"type:VARCHAR(255)" json:"deployedBy"`
+	FailureEncountered bool       `gorm:"type:BOOLEAN" json:"failureEncountered"`
+	LastModifiedBy     string     `gorm:"type:VARCHAR(255)" json:"lastModifiedBy"`
+	LastModifiedOn     time.Time  `gorm:"type:TIMESTAMP;DEFAULT:CURRENT_TIMESTAMP" json:"lastModifiedOn"`
+	Name               string     `gorm:"type:VARCHAR(255)" json:"name"`
+	QueueTime          *time.Time `gorm:"type:BIGINT" json:"queueTime,omitempty"`
+	SpaceId            string     `gorm:"type:VARCHAR(255)" json:"spaceId"`
+	TaskId             string     `gorm:"type:VARCHAR(255)" json:"taskId"`
+	TenantId           string     `gorm:"type:VARCHAR(255)" json:"tenantId"`
+	UseGuidedFailure   bool       `gorm:"type:BOOLEAN" json:"useGuidedFailure"`
 }
 
 func (OctopusDeployment) TableName() string {
@@ -38,5 +46,5 @@ func (OctopusDeployment) TableName() string {
 }
 
 func (d OctopusDeployment) GetDeploymentKey() string {
-	return fmt.Sprintf("%d-%s", d.ConnectionId, d.DeploymentId)
+	return fmt.Sprintf("%d-%s", d.ConnectionId, d.Id)
 }

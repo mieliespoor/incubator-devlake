@@ -28,34 +28,34 @@ import (
 	"github.com/apache/incubator-devlake/plugins/octopus/models"
 )
 
-const RAW_PROJECTS_TABLE = "octopus_api_projects"
+const RAW_ENVIRONMENTS_TABLE = "octopus_api_environments"
 
-var CollectApiProjectsMeta = plugin.SubTaskMeta{
-	Name:             "Collect Projects",
-	EntryPoint:       CollectApiProjects,
+var CollectApiEnvironmentsMeta = plugin.SubTaskMeta{
+	Name:             "Collect Environments",
+	EntryPoint:       CollectApiEnvironments,
 	EnabledByDefault: true,
-	Description:      "Collect project data from gitlab api, supports both timeFilter and diffSync.",
+	Description:      "Collect environment data from octopus api.",
 	DomainTypes:      []string{plugin.DOMAIN_TYPE_CICD},
 	Dependencies:     []*plugin.SubTaskMeta{},
 }
 
-func CollectApiProjects(taskCtx plugin.SubTaskContext) errors.Error {
+func CollectApiEnvironments(taskCtx plugin.SubTaskContext) errors.Error {
 	data := taskCtx.GetData().(*OctopusTaskData)
 
 	collector, err := api.NewApiCollector(api.ApiCollectorArgs{
 		RawDataSubTaskArgs: api.RawDataSubTaskArgs{
 			Ctx:   taskCtx,
-			Table: RAW_PROJECTS_TABLE,
+			Table: RAW_ENVIRONMENTS_TABLE,
 			Params: models.OctopusApiParams{
 				ConnectionId: data.Options.ConnectionId,
 				Name:         data.Options.ApplicationName,
 			},
 		},
 		ApiClient:   data.ApiClient,
-		UrlTemplate: "/projects/{{.Params.ProjectId}}",
+		UrlTemplate: "/environments",
 		Query: func(reqData *api.RequestData) (url.Values, errors.Error) {
 			query := url.Values{}
-			query.Set("refresh", "false")
+			// query.Set("space", data.Options.SpaceId)
 			return query, nil
 		},
 		ResponseParser: func(res *http.Response) ([]json.RawMessage, errors.Error) {

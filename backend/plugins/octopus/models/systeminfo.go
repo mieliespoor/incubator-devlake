@@ -17,16 +17,10 @@ limitations under the License.
 
 package models
 
-import "github.com/apache/incubator-devlake/core/models/common"
-
-type OctopusScopeConfig struct {
-	common.ScopeConfig `mapstructure:",squash" json:",inline" gorm:"embedded"`
-	ID                 uint64 `gorm:"primaryKey;autoIncrement" json:"id"`
-	ConnectionId       uint64 `gorm:"primaryKey;type:BIGINT  NOT NULL" json:"connectionId"`
-	ProjectId          string `gorm:"primaryKey;type:VARCHAR(255) NOT NULL" json:"projectId"`
-	// add more fields if necessary
-}
-
-func (OctopusScopeConfig) TableName() string {
-	return "octopus_scope_configs"
+type OctopusSystemInfo struct {
+	Id              uint64 `json:"id" gorm:"primaryKey;autoIncrement"`
+	ConnectionId    uint64 `json:"connectionId" gorm:"type:BIGINT  NOT NULL"`
+	Version         string `json:"version" gorm:"type:VARCHAR(255)"`
+	CurrentTime     string `json:"currentTime" gorm:"type:VARCHAR(255)"`
+	SupportsTenants bool   `json:"supportsTenants" gorm:"type:BOOLEAN"`
 }

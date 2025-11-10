@@ -17,32 +17,25 @@ limitations under the License.
 
 package models
 
-import "github.com/apache/incubator-devlake/core/plugin"
+import (
+	"time"
+
+	"github.com/apache/incubator-devlake/core/models/common"
+	"github.com/apache/incubator-devlake/core/plugin"
+)
 
 var _ plugin.ToolLayerScope = (*OctopusProject)(nil)
 
 type OctopusProject struct {
-	ID           uint64 `gorm:"primaryKey;autoIncrement" json:"id"`
-	ConnectionId uint64 `gorm:"primaryKey;type:BIGINT  NOT NULL" json:"connectionId"`
-	ProjectId    string `gorm:"primaryKey;type:VARCHAR(255) NOT NULL" json:"projectId"`
-	Name         string `gorm:"type:VARCHAR(255)" json:"name"`
-	Description  string `gorm:"type:TEXT" json:"description"`
-	Created      string `gorm:"type:VARCHAR(255)" json:"created"`
-	CreatedBy    string `gorm:"type:VARCHAR(255)" json:"createdBy"`
-	Updated      string `gorm:"type:VARCHAR(255)" json:"updated"`
-	UpdatedBy    string `gorm:"type:VARCHAR(255)" json:"updatedBy"`
-
-	// add more fields if necessary
-}
-
-// ScopeConnectionId implements plugin.ToolLayerScope.
-func (p *OctopusProject) ScopeConnectionId() uint64 {
-	return p.ConnectionId
-}
-
-// ScopeScopeConfigId implements plugin.ToolLayerScope.
-func (p *OctopusProject) ScopeScopeConfigId() uint64 {
-	return 0
+	common.Scope   `mapstructure:",squash" gorm:"embedded"`
+	Id             string    `gorm:"primaryKey;type:VARCHAR(255) NOT NULL" json:"id"`
+	ConnectionId   uint64    `gorm:"primaryKey;type:BIGINT  NOT NULL" json:"connectionId"`
+	Name           string    `gorm:"type:VARCHAR(255)" json:"name"`
+	Description    string    `gorm:"type:TEXT" json:"description"`
+	LastModifiedBy string    `gorm:"type:VARCHAR(255)" json:"lastModifiedBy"`
+	LastModifiedOn time.Time `gorm:"type:TIMESTAMP;DEFAULT:CURRENT_TIMESTAMP" json:"lastModifiedOn"`
+	Slug           string    `gorm:"type:VARCHAR(255)" json:"slug"`
+	SpaceId        string    `gorm:"type:VARCHAR(255)" json:"spaceId"`
 }
 
 func (OctopusProject) TableName() string {
@@ -50,7 +43,7 @@ func (OctopusProject) TableName() string {
 }
 
 func (p OctopusProject) ScopeId() string {
-	return p.ProjectId
+	return p.Id
 }
 
 func (p OctopusProject) ScopeName() string {
@@ -64,7 +57,7 @@ func (p OctopusProject) ScopeFullName() string {
 func (p OctopusProject) ScopeParams() interface{} {
 	return &OctopusApiParams{
 		ConnectionId: p.ConnectionId,
-		ProjectId:    p.ProjectId,
+		ProjectId:    p.Id,
 	}
 }
 

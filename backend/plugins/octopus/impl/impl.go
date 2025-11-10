@@ -84,10 +84,10 @@ func (p Octopus) MakeDataSourcePipelinePlanV200(
 func (p Octopus) GetTablesInfo() []dal.Tabler {
 	return []dal.Tabler{
 		&models.OctopusConnection{},
-		&models.OctopusProject{},
 		&models.OctopusDeployment{},
+		&models.OctopusEnvironment{},
+		&models.OctopusProject{},
 		&models.OctopusScopeConfig{},
-		// Add other models as needed
 	}
 }
 
