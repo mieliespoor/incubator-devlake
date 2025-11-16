@@ -28,6 +28,7 @@ import { GitHubConfig } from './github';
 import { GitLabConfig } from './gitlab';
 import { JenkinsConfig } from './jenkins';
 import { JiraConfig } from './jira';
+import { OctopusDeployConfig } from './octopus';
 import { PagerDutyConfig } from './pagerduty';
 import { SonarQubeConfig } from './sonarqube';
 import { TAPDConfig } from './tapd';
@@ -51,6 +52,7 @@ export const pluginConfigs: IPluginConfig[] = [
   GitLabConfig,
   JenkinsConfig,
   JiraConfig,
+  OctopusDeployConfig,
   PagerDutyConfig,
   SlackConfig,
   QDevConfig,

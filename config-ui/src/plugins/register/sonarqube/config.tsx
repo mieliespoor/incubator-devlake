@@ -27,7 +27,7 @@ export const SonarQubeConfig: IPluginConfig = {
   plugin: 'sonarqube',
   name: 'SonarQube',
   icon: ({ color }) => <Icon fill={color} />,
-  sort: 14,
+  sort: 15,
   connection: {
     docLink: DOC_URL.PLUGIN.SONARQUBE.BASIS,
     initialValues: {

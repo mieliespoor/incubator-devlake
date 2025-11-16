@@ -21,48 +21,61 @@ import { DOC_URL } from '@/release';
 import { IPluginConfig } from '@/types';
 
 import Icon from './assets/icon.svg?react';
-import { Endpoint } from './connection-fields';
 
-export const OpsgenieConfig: IPluginConfig = {
-  plugin: 'opsgenie',
-  name: 'Opsgenie',
+export const OctopusDeployConfig: IPluginConfig = {
+  plugin: 'octopus',
+  name: 'Octopus Deploy',
   icon: ({ color }) => <Icon fill={color} />,
-  sort: 11,
+  sort: 10,
+  isBeta: true,
   connection: {
-    docLink: DOC_URL.PLUGIN.OPSGENIE.BASIS,
+    docLink: '',
     initialValues: {
-      endpoint: 'https://api.opsgenie.com/',
+      endpoint: 'https://',
     },
     fields: [
       'name',
-      ({ initialValues, values, setValues }: any) => (
-        <Endpoint
-          initialValue={initialValues.endpoint ?? ''}
-          value={values.endpoint ?? ''}
-          setValue={(value) => setValues({ endpoint: value })}
-        />
-      ),
+      {
+        key: 'endpoint',
+        subLabel: 'Provide the Octopus Deploy server API endpoint. E.g. https://octopus.example.com/api/',
+      },
       {
         key: 'token',
-        label: 'Opsgenie API Key',
+        label: 'X-Octopus-ApiKey',
         subLabel: (
-          <ExternalLink link={DOC_URL.PLUGIN.OPSGENIE.AUTH_TOKEN}>
-            Learn how to create a Atlassian Opsgenie personal API Key
-          </ExternalLink>
+          <>
+            Provide your Octopus Deploy API key for authentication.{' '}
+            <ExternalLink link="https://octopus.com/docs/octopus-rest-api/how-to-create-an-api-key">
+              Learn how to generate an api key
+            </ExternalLink>
+          </>
         ),
       },
       'proxy',
       {
         key: 'rateLimitPerHour',
         subLabel:
-          'By default, DevLake uses 6,000 requests/hour for data collection for Opsgenie. But you can adjust the collection speed by setting up your desirable rate limit.',
-        learnMore: DOC_URL.PLUGIN.OPSGENIE.RATE_LIMIT,
-        externalInfo: 'Opsgenie rate limit is based on number of users and domains.',
-        defaultValue: 6000,
+          'By default, DevLake uses 3,000 requests/hour for data collection for Octopus Deploy. You can adjust the collection speed by setting your desired rate limit.',
+        learnMore: '',
+        externalInfo: 'Octopus Deploy does not specify a maximum rate limit value.',
+        defaultValue: 3000,
       },
     ],
   },
   dataScope: {
-    title: 'Opsgenie Services *',
+    title: 'Applications',
+    millerColumn: {
+      columnCount: 2,
+      firstColumnTitle: 'Projects',
+    },
+  },
+  scopeConfig: {
+    entities: ['CICD'],
+    transformation: {
+      component: 'OctopusDeployTransformation',
+      envNamePattern: '(?i)prod(.*)',
+      deploymentPattern: '',
+      productionPattern: '',
+    },
   },
 };

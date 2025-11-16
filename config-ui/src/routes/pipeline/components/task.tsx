@@ -92,6 +92,9 @@ export const PipelineTask = ({ task }: Props) => {
       case ['argocd'].includes(config.plugin):
         name = `${name}:${options.ApplicationName}`;
         break;
+      case ['octopus'].includes(config.plugin):
+        name = `${name}:${options.ApplicationName}`;
+        break;
     }
 
     return [config.icon, name];
