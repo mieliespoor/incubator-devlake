@@ -34,22 +34,14 @@ func main() {
 	_ = cmd.MarkFlagRequired("project-id")
 	_ = cmd.MarkFlagRequired("connection-id")
 
+	envNamePattern := cmd.Flags().String("envNamePattern", "", "environment name pattern")
+
 	cmd.Run = func(cmd *cobra.Command, args []string) {
 		runner.DirectRun(cmd, args, PluginEntry, map[string]interface{}{
 			"projectId":    *projectId,
 			"connectionId": *connectionId,
 			"scopeConfig": map[string]interface{}{
-				"prType":               *prType,
-				"prComponent":          *prComponent,
-				"prBodyClosePattern":   *prBodyClosePattern,
-				"issueSeverity":        *issueSeverity,
-				"issuePriority":        *issuePriority,
-				"issueComponent":       *issueComponent,
-				"issueTypeBug":         *issueTypeBug,
-				"issueTypeIncident":    *issueTypeIncident,
-				"issueTypeRequirement": *issueTypeRequirement,
-				"deploymentPattern":    *deploymentPattern,
-				"productionPattern":    *productionPattern,
+				"envNamePattern": *envNamePattern,
 			},
 		}, *timeAfter)
 	}

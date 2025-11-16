@@ -26,10 +26,11 @@ import (
 	coreModels "github.com/apache/incubator-devlake/core/models"
 	"github.com/apache/incubator-devlake/core/plugin"
 	helper "github.com/apache/incubator-devlake/helpers/pluginhelper/api"
-	"github.com/apache/incubator-devlake/helpers/pluginhelper/subtaskmeta/sorter"
 	"github.com/apache/incubator-devlake/plugins/octopus/api"
 	"github.com/apache/incubator-devlake/plugins/octopus/models"
-	"github.com/apache/incubator-devlake/plugins/octopus/models/migrationscripts"
+	"github.com/apache/incubator-devlake/plugins/opsgenie/models/migrationscripts"
+
+	// "github.com/apache/incubator-devlake/plugins/octopus/models/migrationscripts"
 	"github.com/apache/incubator-devlake/plugins/octopus/tasks"
 )
 
@@ -47,15 +48,6 @@ var _ interface {
 type Octopus struct{}
 
 var sortedSubtaskMetas []plugin.SubTaskMeta
-
-func init() {
-	var err error
-	// check subtask meta loop and gen subtask list when plugin init
-	sortedSubtaskMetas, err = sorter.NewDependencySorter(tasks.SubTaskMetaList).Sort()
-	if err != nil {
-		panic(err)
-	}
-}
 
 func (p Octopus) Init(basicRes context.BasicRes) errors.Error {
 	api.Init(basicRes, p)
@@ -78,7 +70,7 @@ func (p Octopus) MakeDataSourcePipelinePlanV200(
 	connectionId uint64,
 	scopes []*coreModels.BlueprintScope,
 ) (coreModels.PipelinePlan, []plugin.Scope, errors.Error) {
-	return api.MakeDataSourcePipelinePlanV200(p.SubTaskMetas(), connectionId, scopes)
+	return api.MakePipelinePlanV200(p.SubTaskMetas(), connectionId, scopes)
 }
 
 func (p Octopus) GetTablesInfo() []dal.Tabler {
@@ -169,14 +161,8 @@ func (p Octopus) ApiResources() map[string]map[string]plugin.ApiResourceHandler 
 			"PATCH":  api.PatchScope,
 			"DELETE": api.DeleteScope,
 		},
-		"connections/:connectionId/scopes/:scopeId/latest-sync-state": {
-			"GET": api.GetScopeLatestSyncState,
-		},
 		"connections/:connectionId/remote-scopes": {
 			"GET": api.RemoteScopes,
-		},
-		"connections/:connectionId/search-remote-scopes": {
-			"GET": api.SearchRemoteScopes,
 		},
 		"connections/:connectionId/scopes": {
 			"GET": api.GetScopeList,

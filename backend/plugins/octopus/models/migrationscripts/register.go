@@ -15,17 +15,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package models
+package migrationscripts
 
-import "github.com/apache/incubator-devlake/core/models/common"
+import (
+	"github.com/apache/incubator-devlake/core/plugin"
+)
 
-type OctopusScopeConfig struct {
-	common.ScopeConfig `mapstructure:",squash" json:",inline" gorm:"embedded"`
-	Id                 uint64 `gorm:"primaryKey;autoIncrement" json:"id"`
-	ProjectId          string `gorm:"primaryKey;type:VARCHAR(255) NOT NULL" json:"projectId"`
-	// add more fields if necessary
-}
-
-func (OctopusScopeConfig) TableName() string {
-	return "_tool_octopus_scope_configs"
+func All() []plugin.MigrationScript {
+	return []plugin.MigrationScript{
+		new(addInitTables),
+	}
 }

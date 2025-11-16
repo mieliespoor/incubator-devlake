@@ -73,9 +73,9 @@ func queryOctopusProjects(
 	children = make([]dsmodels.DsRemoteApiScopeListEntry[models.OctopusProject], 0)
 	for _, project := range allProjects {
 		children = append(children, dsmodels.DsRemoteApiScopeListEntry[models.OctopusProject]{
-			Scope: project,
-			Id:    project.Id,
-			Name:  project.Name,
+			// Scope: project,
+			Id:   project.Id,
+			Name: project.Name,
 		})
 	}
 
@@ -122,24 +122,25 @@ func listOctopusRemoteScopes(
 	if page.Skip < 0 {
 		page.Skip = 0
 	}
-	options := map[string]string{
-		"skip": fmt.Sprintf("%d", page.Skip),
-		"take": fmt.Sprintf("%d", page.Take),
-	}
-	if spaceId != "" {
-		options["spaceId"] = spaceId
-	}
+
 	var projects []models.OctopusProject
+	query := url.Values{}
+	query.Add("skip", fmt.Sprintf("%d", page.Skip))
+	query.Add("take", fmt.Sprintf("%d", page.Take))
+	if spaceId != "" {
+		query.Add("spaceId", spaceId)
+	}
 	// res, err := apiClient.Get("projects/search", url.Values{
 	// 	"skip":  {fmt.Sprintf("%v", page.Skip)},
 	// 	"take": {fmt.Sprintf("%v", page.Take)},
 	// 	"partialName":  {keyword},
 	// }, nil)
-	apiClient.Get("projects", nil, nil)
-	err = apiClient.GetPaged("projects", options, &projects)
+	// TODO: handle pagination and response
+	_, err = apiClient.Get("projects", query, nil)
 	if err != nil {
 		return nil, nil, err
 	}
+
 	for _, project := range projects {
 		children = append(children, dsmodels.DsRemoteApiScopeListEntry[models.OctopusProject]{
 			// Scope: project,
@@ -186,9 +187,9 @@ func listOctopusRemoteScopes(
 // @Param pageToken query string false "page Token"
 // @Failure 400  {object} shared.ApiBody "Bad Request"
 // @Failure 500  {object} shared.ApiBody "Internal Error"
-// @Success 200  {object} dsmodels.DsRemoteApiScopeList[models.JenkinsJob]
-// @Tags plugins/jenkins
-// @Router /plugins/jenkins/connections/{connectionId}/remote-scopes [GET]
+// @Success 200  {object} dsmodels.DsRemoteApiScopeList[models.OctopusProject]
+// @Tags plugins/octopus
+// @Router /plugins/octopus/connections/{connectionId}/remote-scopes [GET]
 func RemoteScopes(input *plugin.ApiResourceInput) (*plugin.ApiResourceOutput, errors.Error) {
 	return raScopeList.Get(input)
 }
@@ -197,8 +198,8 @@ func RemoteScopes(input *plugin.ApiResourceInput) (*plugin.ApiResourceOutput, er
 // @Description Forward API requests to the specified remote server
 // @Param connectionId path int true "connection ID"
 // @Param path path string true "path to a API endpoint"
-// @Router /plugins/jenkins/connections/{connectionId}/proxy/{path} [GET]
-// @Tags plugins/jenkins
+// @Router /plugins/octopus/connections/{connectionId}/proxy/{path} [GET]
+// @Tags plugins/octopus
 func Proxy(input *plugin.ApiResourceInput) (*plugin.ApiResourceOutput, errors.Error) {
 	return raProxy.Proxy(input)
 }

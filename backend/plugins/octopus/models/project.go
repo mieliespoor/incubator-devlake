@@ -29,7 +29,6 @@ var _ plugin.ToolLayerScope = (*OctopusProject)(nil)
 type OctopusProject struct {
 	common.Scope   `mapstructure:",squash" gorm:"embedded"`
 	Id             string    `gorm:"primaryKey;type:VARCHAR(255) NOT NULL" json:"id"`
-	ConnectionId   uint64    `gorm:"primaryKey;type:BIGINT  NOT NULL" json:"connectionId"`
 	Name           string    `gorm:"type:VARCHAR(255)" json:"name"`
 	Description    string    `gorm:"type:TEXT" json:"description"`
 	LastModifiedBy string    `gorm:"type:VARCHAR(255)" json:"lastModifiedBy"`
@@ -39,7 +38,7 @@ type OctopusProject struct {
 }
 
 func (OctopusProject) TableName() string {
-	return "octopus_projects"
+	return "_tool_octopus_projects"
 }
 
 func (p OctopusProject) ScopeId() string {
